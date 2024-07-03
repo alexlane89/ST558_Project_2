@@ -1,0 +1,44 @@
+---
+title: "ST558 Project 2"
+author: "Charles Lane"
+format: html
+editor: visual
+---
+
+## Introduction
+
+>  In searching for an interesting, data set with which to build a query app, several free data sources were evaluated, primarily through the admittedly subjective lens of "do I find this interesting?" The question is, what data do I find interesting, and why? Such that I might communicate to my audience why it's interesting and hopefully share some of that enjoyment. /
+>  The first attribute I look for instinctually is data with a tie to historical events, people, geography, etc. The most comfortable items in that category are generally census population or business data, especially for North Carolina. I've lived in North Carolina my entire life, and I certainly enjoy exploring more of it. However, as I was reading through several API options, I stumbled across a data set that may not have checked the very familiar/local box, but certainly intrigued my desire to see history. /
+>  All historical Nobel Prizes, and their associated laureates are included in a data set offered by the Nobel Prize committee. This data set is quite intriguing to me because of its historical connotations, certainly over the past 1 and a quarter century, but also what I might call its "succinct breadth" of topics. There are only 6 categories of Nobel Prizes given each year, but what a wonderful snapshot of time is available by reviewing recognitions in Chemistry, Physics, Medicine, Economics, Literature, and of course Peace across years?
+
+## Querying the API
+
+> My first step is to attempt to query the Nobel API statically. Before I build the app, I'd like to make sure I can get a variety of different information and work with it realistically, before creating a shiny app which will allow others to query the same data sets. /
+>  There are several packages I would initially like to load given the activities I am attempting. To be able to make an API call and work with the resulting data, I will load 'httr' and 'jsonlite' packages.
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+```{r}
+x <- GET("https://api.nobelprize.org/2.1/nobelPrizes?nobelPrizeYear=1920")
+
+y <- fromJSON(rawToChar(x$content))
+z <- as_tibble(y$nobelPrizes)
+z
+```
+
+> The resulting list of 10 elements included mostly elements describing attributes of the query itself. i.e. headers about what type of server hosts the data, how the content is encoded, which cookies are included in the request, the date/time of the request, etc. I was able to find that the information in question, however, appeared to be the in $content list element. Within this element, several more data frames existed. For example, the category and the laureate names, amongst other information.
+
+
+```{r}
+clean_data <- z |>
+  select(!links) |>
+  mutate(Category = z$category$en)
+
+clean_data
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
