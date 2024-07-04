@@ -13,6 +13,8 @@ editor: visual
 
 ## Querying the API
 
+### Nobel Prize Information
+
 > My first step is to attempt to query the Nobel API statically. Before I build the app, I'd like to make sure I can get a variety of different information and work with it realistically, before creating a shiny app which will allow others to query the same data sets. /
 >  There are several packages I would initially like to load given the activities I am attempting. To be able to make an API call and work with the resulting data, I will load 'httr' and 'jsonlite' packages.
 
@@ -32,6 +34,7 @@ https://app.swaggerhub.com/apis/NobelMedia/NobelMasterData/2.1 \
 **4)**    Physics Prizes
 **5)**    Literature Prizes
 **6)**    Economics Prizes
+**7)**    Laureate Information
 
 > Eventually, we'll create one function to retrieve a data table for all years of each Nobel Prize category. The first "sub-function" will be simply one to query the Nobel API with a specification for each category. A list will be returned that includes elements associated with each "bucket" of 25-year prize data.
 
@@ -122,20 +125,12 @@ clean_data <- function(x, conv = "USD/SEK") {
     mutate(Category = x$category$en,
            AdjustedPrize_SEK = x$prizeAmountAdjusted,
            AdjustedPrize_USD = x$prizeAmountAdjusted * conversion[1]
-           )
+           ) |>
+    unnest(cols = laureates) |>
+    select(!links)
 
   return(c_data)
 }
-
-#for (i in seq_along(z$laureates)) {
-#  ifelse(z$laureates[[i]]$portion == 1,
-#          clean_data$Laureate_Name[i] <- z$laureates[[i]]$knownName$en,
-#          clean_data$Laureate_Name[i] <- #list(z$laureates[[i]]$knownName$en)
-#  else if (z$laureates[[i]]$portion < 1) {
-    
-#  )
-#    }
-#}
 ```
 
 > Create a wrapper function to get the data, convert to tibble, combine all years into one dataset, and finally, clean the dataset.
@@ -157,14 +152,88 @@ get_Nobel_Prize_data <- function(category = "Chemistry") {
 physics_prizes <- get_Nobel_Prize_data(category = "Physics")
 ```
 
-## Data Visualization
+### Laureate Endpoint
+
 > To see attributes of the Nobel laureates, another API endpoint "laureates" will be referenced. This endpoint returns birth country, institution information about the laureates. It also includes laureate id references which are in the Nobel Prize endpoints as well.
 
 ```{r}
-#get_laureate_data <- function() {
-  x <- GET("http://api.nobelprize.org/2.1/laureates?ID=236")
-#}
+  x <- GET("https://api.nobelprize.org/2.1/laureates")
+  y <- content(x, "text") |>
+    fromJSON()
+  z <- as_tibble(y$laureates)
 ```
+
+> There is a limit to how many laureates can be returned by any one requesst - 25. To iterate through buckets of 25 laureates at a time, I first need to determine the max number of laureate ids. the 'det_last_id' function determines if data is returned for a specific ID from the query. The function returns a TRUE or FALSE based on if the output query has contents or not.
+
+```{r}
+det_id_res <- function(ID = 1100) {
+  ID_STR <- as.character(ID)
+  a <- GET(paste0("https://api.nobelprize.org/2.1/laureates?ID=",
+                  ID_STR))
+  b <- content(a, "text") |>
+    fromJSON()
+
+return(is_empty(b$laureates))
+}
+```
+
+> I can use another function to iterate through and determine the last ID.
+
+```{r}
+det_last_id <- function(begin = 1000, end = 1050) {
+  for (i in seq(from = begin, to = end)) {
+    if (det_id_res(ID = i) == TRUE) {
+      return(paste0("Max ID = ",i))
+      stop()
+    }
+  }
+}
+
+det_last_id()
+```
+
+> Now I'll need to create a dataset for all 1010 ID entries.
+
+```{r}
+
+get_laureate_data <- function() {
+  a <- GET(paste0("https://api.nobelprize.org/2.1/laureates"))
+  b <- content(a, "text") |>
+    fromJSON()
+  c <- as_tibble(b$laureates)
+  d <- c
+  for (i in seq(from = 26, to = 1010, by = 25)) {
+    a <- GET(paste0("https://api.nobelprize.org/2.1/laureates?offset=",
+                    i))
+    b <- content(a, "text") |>
+      fromJSON()
+    c <- as_tibble(b$laureates)
+    d <- bind_rows(d, c)
+  }
+  return(d)
+}
+```
+
+> Test this function, and a note that this should only be run sporadically as it makes a large amount of API calls. Also, for this reason, any cleaning functions should be separate, and I'm not going to create one request & cleaning function like I did for the Nobel Prize data.
+
+```{r}
+laureate_resp <- get_laureate_data()
+```
+
+> Removing some extraneous rows to clean the data:
+
+```{r}
+clean_laureate <- function(x) {
+  y <- x |>
+    unnest(cols = knownName) |>
+    mutate(Known_Name = en) |>
+    select(!en & !se & !no)
+  return(y)
+}
+```
+
+
+## Data Visualization
 
 
 The `echo: false` option disables the printing of code (only output is displayed).
