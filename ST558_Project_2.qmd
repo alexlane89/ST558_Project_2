@@ -247,7 +247,10 @@ clean_birth_laureate <- function(x) {
     select(!locationString) |>
     unnest(cols = city) |>
     mutate(Birth_City = en) |>
-    select(!en & !se & !no & !cityNow & !countryNow) |>
+    select(!en & !se & !no & !cityNow) |>
+    unnest(cols = countryNow) |>
+    mutate(Birth_Country_Now = en) |>
+    select(!en & !se & !no & !sameAs & !latitude & !longitude) |>
     unnest(cols = country) |>
     mutate(Birth_Country = en) |>
     select(!en & !se & !no) |>
@@ -311,6 +314,18 @@ clean_laureate <- function(x) {
 }
 ```
 
+> Gender Proportion
+
+```{r}
+z <- clean_laureate(laureate_resp)
+
+z_2 <- z |>
+  count(awardYear, gender)
+
+z_2
+```
+
+
 
 ## Data Visualization
 
@@ -327,11 +342,44 @@ gg <- ggplot(z, aes(Birth_Country))
 gg + geom_bar()
 ```
 
-> Create a contingency table of prize years and adjusted prize values
+> Create a box plot of prize year and adjusted prize values in USD
 
 ```{r}
-con1 <- table(physics_prizes$awardYear, physics_prizes$AdjustedPrize_USD)
-
-con1
+m <- ggplot(physics_prizes, aes(awardYear, AdjustedPrize_USD))
+m + geom_boxplot()
 ```
+
+> Number of male & female laureates by year
+
+```{r}
+s <- ggplot(z_2, aes(awardYear, n, fill = factor(gender, levels = c("male", "female"))))
+s + geom_col()
+```
+
+
+> Create a geom map that identifies the location and number of prizes in each country per category. Based on the ggplot2 help graphic / cheat sheet, the "sf" or "simple features" package is required to intereact with geometric data.
+
+```{r}
+library(sf)
+```
+
+
+```{r}
+world_coordinates <- map_data("world")
+
+wm <- ggplot() + 
+  
+  geom_map(data = world_coordinates, map = world_coordinates,
+           aes(long, lat, map_id = region)
+           ) +
+  
+  geom_count(z,
+             mapping = aes(Birth_Country_Now)
+             )
+
+#wm <- sf::st_read(system.file("shape."))
+
+wm
+```
+
 
