@@ -223,11 +223,90 @@ laureate_resp <- get_laureate_data()
 > Removing some extraneous rows to clean the data:
 
 ```{r}
-clean_laureate <- function(x) {
+clean_name_laureate <- function(x) {
   y <- x |>
-    unnest(cols = knownName) |>
+    unnest(cols = c(knownName)) |>
     mutate(Known_Name = en) |>
+    select(!en & !se & !no & !familyName & !fullName & !givenName &
+             !fileName & !wikipedia & !sameAs & !links & !wikidata
+           & !founded & !foundedCountry & !foundedContinent
+           & !foundedCountryNow)
+  return(y)
+}
+```
+
+> There are SO many attributes associated with 'birth', including city then & currently in multiple languages, country, and continent then and currently in each language. Let's isolate just the english descriptions of city, country, and continent then (not the current geographical locations).
+
+```{r}
+clean_birth_laureate <- function(x) {
+  y <- x |>
+    unnest(cols = birth) |>
+    mutate(Birth_Date = date) |>
+    select(!date) |>
+    unnest(cols = place) |>
+    select(!locationString) |>
+    unnest(cols = city) |>
+    mutate(Birth_City = en) |>
+    select(!en & !se & !no & !cityNow & !countryNow) |>
+    unnest(cols = country) |>
+    mutate(Birth_Country = en) |>
+    select(!en & !se & !no) |>
+    unnest(cols = continent) |>
+    mutate(Birth_Continent = en) |>
     select(!en & !se & !no)
+}
+```
+
+> Similar to birth, there are an equal number of 'death' attributes. A similar function can be written to clean up the 'death' atributes.
+
+```{r}
+clean_death_laureate <- function(x) {
+  y <- x |>
+    unnest(cols = death) |>
+    mutate(Death_Date = date) |>
+    select(!date) |>
+    unnest(cols = place) |>
+    unnest(cols = city) |>
+    mutate(Death_City = en) |>
+    select(!en & !se & !no & !cityNow & !countryNow) |>
+    unnest(cols = country) |>
+    mutate(Death_Country = en) |>
+    select(!en & !se & !no) |>
+    unnest(cols = continent) |>
+    mutate(Death_Continent = en) |>
+    select(!en & !se & !no & !locationString & !sameAs)
+}
+```
+
+> Final cleaning stage to parse out the organiation name and unnest the nobelPrizes variable.
+
+```{r}
+clean_addl_laureate <- function(x) {
+  y <- x |>
+    unnest(cols = nobelPrizes) |>
+    unnest(cols = category) |>
+    mutate(Category = en) |>
+    select(!en & !se & !no & !categoryFullName) |>
+    unnest(cols = motivation) |>
+    mutate(Motivation = en) |>
+    select(!en & !se & !no) |>
+    unnest(cols = orgName) |>
+    mutate(Organization = en) |>
+    select(!en & !se & !no)
+  return(y)
+}
+```
+
+
+
+> Use all the individual cleaning functions to ultimately clean the laureate data:
+
+```{r}
+clean_laureate <- function(x) {
+  y <- clean_name_laureate(x) |>
+    clean_birth_laureate() |>
+    clean_death_laureate() |>
+    clean_addl_laureate()
   return(y)
 }
 ```
@@ -235,5 +314,24 @@ clean_laureate <- function(x) {
 
 ## Data Visualization
 
+> There are a variety of different visuals which can be developed from the preceding Nobel Prize data.
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+z <- clean_laureate(laureate_resp)
+```
+
+> Plot a bar graph with counts of Nobel Prizes associated with each Birth Country
+
+```{r}
+gg <- ggplot(z, aes(Birth_Country))
+gg + geom_bar()
+```
+
+> Create a contingency table of prize years and adjusted prize values
+
+```{r}
+con1 <- table(physics_prizes$awardYear, physics_prizes$AdjustedPrize_USD)
+
+con1
+```
+
