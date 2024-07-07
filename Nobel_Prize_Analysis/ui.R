@@ -27,7 +27,10 @@ ui <- dashboardPage(
     tabItems(
       #Overview Tab content
       tabItem(tabName = "overview",
-              fluidRow()),
+              fluidRow(
+                h3("An Introduction to Nobel Prize Laureate Data"),
+                img(src = "Alfred_Nobel_img.jpg")
+              )),
       tabItem(tabName = "download",
               fluidRow(
                 actionButton(inputId = "download_button", label = "Download Data")
@@ -37,7 +40,8 @@ ui <- dashboardPage(
                 radioButtons(inputId = "category_sel", "Category Selection",
                              choices = c("Chemistry", "Economic Sciences",
                                          "Literature", "Medicine", "Peace",
-                                         "Physics"))
+                                         "Physics")),
+                plotOutput("birth_hist")
               ))
     )
   ),

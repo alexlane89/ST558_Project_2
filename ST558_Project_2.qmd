@@ -7,16 +7,13 @@ editor: visual
 
 ## Introduction
 
->  In searching for an interesting, data set with which to build a query app, several free data sources were evaluated, primarily through the admittedly subjective lens of "do I find this interesting?" The question is, what data do I find interesting, and why? Such that I might communicate to my audience why it's interesting and hopefully share some of that enjoyment. /
->  The first attribute I look for instinctually is data with a tie to historical events, people, geography, etc. The most comfortable items in that category are generally census population or business data, especially for North Carolina. I've lived in North Carolina my entire life, and I certainly enjoy exploring more of it. However, as I was reading through several API options, I stumbled across a data set that may not have checked the very familiar/local box, but certainly intrigued my desire to see history. /
->  All historical Nobel Prizes, and their associated laureates are included in a data set offered by the Nobel Prize committee. This data set is quite intriguing to me because of its historical connotations, certainly over the past 1 and a quarter century, but also what I might call its "succinct breadth" of topics. There are only 6 categories of Nobel Prizes given each year, but what a wonderful snapshot of time is available by reviewing recognitions in Chemistry, Physics, Medicine, Economics, Literature, and of course Peace across years?
+> In searching for an interesting, data set with which to build a query app, several free data sources were evaluated, primarily through the admittedly subjective lens of "do I find this interesting?" The question is, what data do I find interesting, and why? Such that I might communicate to my audience why it's interesting and hopefully share some of that enjoyment. / The first attribute I look for instinctually is data with a tie to historical events, people, geography, etc. The most comfortable items in that category are generally census population or business data, especially for North Carolina. I've lived in North Carolina my entire life, and I certainly enjoy exploring more of it. However, as I was reading through several API options, I stumbled across a data set that may not have checked the very familiar/local box, but certainly intrigued my desire to see history. / All historical Nobel Prizes, and their associated laureates are included in a data set offered by the Nobel Prize committee. This data set is quite intriguing to me because of its historical connotations, certainly over the past 1 and a quarter century, but also what I might call its "succinct breadth" of topics. There are only 6 categories of Nobel Prizes given each year, but what a wonderful snapshot of time is available by reviewing recognitions in Chemistry, Physics, Medicine, Economics, Literature, and of course Peace across years?
 
 ## Querying the API
 
 ### Nobel Prize Information
 
-> My first step is to attempt to query the Nobel API statically. Before I build the app, I'd like to make sure I can get a variety of different information and work with it realistically, before creating a shiny app which will allow others to query the same data sets. /
->  There are several packages I would initially like to load given the activities I am attempting. To be able to make an API call and work with the resulting data, I will load 'httr' and 'jsonlite' packages.
+> My first step is to attempt to query the Nobel API statically. Before I build the app, I'd like to make sure I can get a variety of different information and work with it realistically, before creating a shiny app which will allow others to query the same data sets. / There are several packages I would initially like to load given the activities I am attempting. To be able to make an API call and work with the resulting data, I will load 'httr' and 'jsonlite' packages.
 
 ```{r}
 library(tidyverse)
@@ -24,17 +21,11 @@ library(httr)
 library(jsonlite)
 ```
 
-> There are 2 specificic endpoints for the Nobel Prize dataset: 'Laureates' and 'Nobel Prizes'. More information on this data can be found through the Nobel Prize organization, here: \
-https://app.swaggerhub.com/apis/NobelMedia/NobelMasterData/2.1 \
-> For our purposes, we will allow the following 6 dataset options to be selectable from the 2 endpoints above: \
+> There are 2 specificic endpoints for the Nobel Prize dataset: 'Laureates' and 'Nobel Prizes'. More information on this data can be found through the Nobel Prize organization, here:\
+> https://app.swaggerhub.com/apis/NobelMedia/NobelMasterData/2.1\
+> For our purposes, we will allow the following 6 dataset options to be selectable from the 2 endpoints above:\
 
-**1)**    Chemistry Nobel Prizes
-**2)**    Physiology & Medicine Prizes
-**3)**    Peace Prizes
-**4)**    Physics Prizes
-**5)**    Literature Prizes
-**6)**    Economics Prizes
-**7)**    Laureate Information
+**1)** Chemistry Nobel Prizes **2)** Physiology & Medicine Prizes **3)** Peace Prizes **4)** Physics Prizes **5)** Literature Prizes **6)** Economics Prizes **7)** Laureate Information
 
 > Eventually, we'll create one function to retrieve a data table for all years of each Nobel Prize category. The first "sub-function" will be simply one to query the Nobel API with a specification for each category. A list will be returned that includes elements associated with each "bucket" of 25-year prize data.
 
@@ -109,11 +100,9 @@ merge_data <- function(x) {
 }
 ```
 
+> The resulting list of 10 elements included mostly elements describing attributes of the query itself. i.e. headers about what type of server hosts the data, how the content is encoded, which cookies are included in the request, the date/time of the request, etc. I was able to find that the information in question, however, appeared to be in the \$content list element. Within this element, several more data frames existed. For example, the category and the laureate names, amongst other information.
 
-> The resulting list of 10 elements included mostly elements describing attributes of the query itself. i.e. headers about what type of server hosts the data, how the content is encoded, which cookies are included in the request, the date/time of the request, etc. I was able to find that the information in question, however, appeared to be in the $content list element. Within this element, several more data frames existed. For example, the category and the laureate names, amongst other information.
-
-> A 'clean_data' function will look at the $content element and also create a new variable/column to show the Adjusted prize amounts in current USD currency. The prize is based in Sweden, so the initial Prize amounts are listed in Swedish Kroner. This function includes an argument to define which conversion rate is preferred.
-
+> A 'clean_data' function will look at the \$content element and also create a new variable/column to show the Adjusted prize amounts in current USD currency. The prize is based in Sweden, so the initial Prize amounts are listed in Swedish Kroner. This function includes an argument to define which conversion rate is preferred.
 
 ```{r}
 clean_data <- function(x, conv = "USD/SEK") {
@@ -144,7 +133,6 @@ get_Nobel_Prize_data <- function(category = "Chemistry") {
   return(cleaned)
 }
 ```
-
 
 > Test out the functions
 
@@ -300,8 +288,6 @@ clean_addl_laureate <- function(x) {
 }
 ```
 
-
-
 > Use all the individual cleaning functions to ultimately clean the laureate data:
 
 ```{r}
@@ -324,8 +310,6 @@ z_2 <- z |>
 
 z_2
 ```
-
-
 
 ## Data Visualization
 
@@ -356,7 +340,6 @@ s <- ggplot(z_2, aes(awardYear, n, fill = factor(gender, levels = c("male", "fem
 s + geom_col()
 ```
 
-
 > Create a geom map that identifies the location and number of prizes in each country per category.
 
 ```{r}
@@ -376,5 +359,3 @@ wm <- ggplot() +
 
 wm
 ```
-
-

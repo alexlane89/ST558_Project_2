@@ -8,26 +8,31 @@
 #
 
 library(shiny)
+library(tidyverse)
+library(jsonlite)
+library(httr)
 
 source("ST558_Project_2.R")
+
+nobel_raw_data <- get_laureate_data()
+nobel_clean_data <- clean_laureate(nobel_raw_data)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
 
-    observeEvent(input$download_button, {
-      nobel_data <- get_laureate_data()
+    nobel_raw_data <- observeEvent(input$download_button, {
+      withProgress(
+        message = "Please Wait",
+        detail = "Downloading...",
+        value = 0, {
+          get_laureate_data()
+        })
     })
   
-    output$distPlot <- renderPlot({
-
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+    output$birth_hist <- renderPlot({
+      
+      gg <- ggplot(nobel_clean_data, aes(Birth_Country))
+      gg + geom_bar()
 
     })
 
