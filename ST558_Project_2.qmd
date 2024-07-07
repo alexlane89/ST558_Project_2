@@ -19,6 +19,7 @@ editor: visual
 library(tidyverse)
 library(httr)
 library(jsonlite)
+library(timeDate)
 ```
 
 > There are 2 specificic endpoints for the Nobel Prize dataset: 'Laureates' and 'Nobel Prizes'. More information on this data can be found through the Nobel Prize organization, here:\
@@ -317,12 +318,17 @@ z_2
 
 ```{r}
 z <- clean_laureate(laureate_resp)
+
+z_cat <- z |>
+  filter(Category == "Chemistry")
+
+z_cat
 ```
 
 > Plot a bar graph with counts of Nobel Prizes associated with each Birth Country
 
 ```{r}
-gg <- ggplot(z, aes(Birth_Country))
+gg <- ggplot(z_cat, aes(Birth_Country, na.rm = TRUE))
 gg + geom_bar()
 ```
 
@@ -336,7 +342,9 @@ m + geom_boxplot()
 > Number of male & female laureates by year
 
 ```{r}
-s <- ggplot(z_2, aes(awardYear, n, fill = factor(gender, levels = c("male", "female"))))
+s <- ggplot(clean_laureate(laureate_resp) |>
+              count(awardYear, gender),
+            aes(awardYear, n, fill = factor(gender, levels = c("male", "female"))))
 s + geom_col()
 ```
 
@@ -359,3 +367,23 @@ wm <- ggplot() +
 
 wm
 ```
+
+
+> Create a table of US recipients and their respective cities
+
+```{r}
+gen_table <- table(z$Birth_Country_Now, z$gender)
+
+gen_table
+```
+
+> Add a gender proportion per country
+
+```{r}
+country_total <- z |>
+  group_by(Birth_Country_Now) |>
+  count(name = "Number of Prizes Awarded")
+
+country_total
+```
+
