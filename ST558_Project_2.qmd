@@ -357,12 +357,7 @@ s + geom_col()
 ```
 
 
-> Create a geom map that identifies the location and number of prizes in each country per category. Based on the ggplot2 help graphic / cheat sheet, the "sf" or "simple features" package is required to intereact with geometric data.
-
-```{r}
-library(sf)
-```
-
+> Create a geom map that identifies the location and number of prizes in each country per category.
 
 ```{r}
 world_coordinates <- map_data("world")
@@ -373,8 +368,8 @@ wm <- ggplot() +
            aes(long, lat, map_id = region)
            ) +
   
-  geom_count(z,
-             mapping = aes(Birth_Country_Now)
+  geom_point(data = z$Birth_Country_Now,
+             aes(longitude, latitude)
              )
 
 #wm <- sf::st_read(system.file("shape."))
