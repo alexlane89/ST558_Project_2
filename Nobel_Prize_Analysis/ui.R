@@ -29,39 +29,39 @@ ui <- dashboardPage(
       tabItem(tabName = "overview",
               fluidRow(
                 box(h3("An Introduction to Nobel Prize Laureate Data")),
-                box(h4("This app is mean to introduce and provide an overview/
-                       of data related to the Nobel Prize awarded to individuals/
-                       yearly since 1901 in 6 distinct categories:/
-                       Chemistry/
-                       Economics/
-                       Literature/
-                       Medicine/
-                       Peace/
-                       Physics/"),
+                box(h6("This app is meant to introduce and provide an overview of
+                        data related to the Nobel Prize awarded to individuals
+                        yearly since 1901 in 6 distinct categories:"),
                     br(),
-                    h4("The Nobel Prize was created as part of Alfred Nobel's/
-                       endowment, and has become one of the most prestigious/
-                       prizes in any of the 6 fields described."),
+                    h6("Chemistry"),
+                    h6("Economics"),
+                    h6("Literature"),
+                    h6("Peace"),
+                    h6("Physiology"),
+                    h6("Physiology or Medicine"),
+                    h6("Physics"),
                     br(),
-                    h4("We will download data from the Nobel API. More/
+                    h6("The Nobel Prize was created as part of Alfred Nobel's 
+                       endowment, and has become one of the most prestigious 
+                       prizes in any of the 6 fields described. 
+                       We will download data from the Nobel API. 
                        information can be found at the link below"),
                     br(),
-#                    tags$a(href = "https://app.swaggerhub.com/apis/NobelMedia/NobelMasterData/2.1\)",
+                    h6("https://app.swaggerhub.com/apis/NobelMedia/NobelMasterData/2.1"),
                     ),
                 img(src = "Alfred_Nobel_img.jpg")
               )),
       tabItem(tabName = "download",
               fluidRow(
-                actionButton(inputId = "download_button", label = "Download Data")
+                box(actionButton(inputId = "download_button", label = "Download Data"))
               )),
       tabItem(tabName = "analysis",
               fluidRow(
                 box(radioButtons(inputId = "category_sel", "Category Selection",
                              choices = c("Chemistry", "Economic Sciences",
-                                         "Literature", "Medicine", "Peace",
+                                         "Literature", "Physiology or Medicine", "Peace",
                                          "Physics"))),
                 box(plotOutput("birth_hist")),
-                box(textOutput("cat_text")),
                 box(tableOutput("gen_table")),
                 box(plotOutput("prizeplot"))
               ))
