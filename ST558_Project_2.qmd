@@ -238,7 +238,8 @@ clean_birth_laureate <- function(x) {
     mutate(Birth_City = en) |>
     select(!en & !se & !no & !cityNow) |>
     unnest(cols = countryNow) |>
-    mutate(Birth_Country_Now = en) |>
+    mutate(Birth_Country_Now = en, Birth_Lat = latitude,
+           Birth_Long = longitude) |>
     select(!en & !se & !no & !sameAs & !latitude & !longitude) |>
     unnest(cols = country) |>
     mutate(Birth_Country = en) |>
@@ -328,15 +329,27 @@ z_cat
 > Plot a bar graph with counts of Nobel Prizes associated with each Birth Country
 
 ```{r}
-gg <- ggplot(z_cat, aes(Birth_Country, na.rm = TRUE))
-gg + geom_bar()
+gg <- ggplot(z_cat, aes(Birth_Country_Now))
+gg + geom_bar(aes(colour = factor(Birth_Continent))) +
+  labs(x = "Birth Country Now",
+       y = "Number of Recipients",
+       title = "Chemistry Prizes Awarded per Birth Country") +
+  theme(axis.text.x = element_text(angle = 90),
+        panel.background = element_rect(fill = "gray"))
 ```
 
 > Create a box plot of prize year and adjusted prize values in USD
 
 ```{r}
 m <- ggplot(physics_prizes, aes(awardYear, AdjustedPrize_USD))
-m + geom_boxplot()
+m +
+  geom_point() +
+  labs(x = "Nobel Award Year",
+       y = "Prize Amount Adjusted to Current USD",
+       title = "Adjusted Nobel Prize $ Amounts by Year") +
+  scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
+  scale_y_continuous(labels = scales::comma) +
+  theme(panel.background = element_rect(fill = "gray"))
 ```
 
 > Number of male & female laureates by year
@@ -345,7 +358,13 @@ m + geom_boxplot()
 s <- ggplot(clean_laureate(laureate_resp) |>
               count(awardYear, gender),
             aes(awardYear, n, fill = factor(gender, levels = c("male", "female"))))
-s + geom_col()
+s +
+  geom_col() +
+  labs(x = "Nobel Award Year",
+       y = "Number of recipients",
+       title = "Number of Award Recipients Grouped by Gender") +
+  scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
+  theme(legend.title = element_blank())
 ```
 
 > Create a geom map that identifies the location and number of prizes in each country per category.
@@ -360,7 +379,7 @@ wm <- ggplot() +
            ) +
   
   geom_point(data = z$Birth_Country_Now,
-             aes(longitude, latitude)
+             aes(z$Birth_Long, z$Birth_Lat)
              )
 
 #wm <- sf::st_read(system.file("shape."))
@@ -369,7 +388,7 @@ wm
 ```
 
 
-> Create a table of US recipients and their respective cities
+> Create a contingency table of Birth Country and the amount of female & male award recipients each Country has.
 
 ```{r}
 gen_table <- table(z$Birth_Country_Now, z$gender)
@@ -385,5 +404,25 @@ country_total <- z |>
   count(name = "Number of Prizes Awarded")
 
 country_total
+```
+
+> Could we evaluate if the overall number of recipients has increased significantly?
+
+```{r}
+num_tot <- z |>
+  group_by(awardYear) |>
+  count(name = "Number of Recipients")
+
+num_tot
+```
+
+> A scatter plot of year vs number of recipients
+
+```{r}
+n <- ggplot(data = z |>
+              group_by(awardYear) |>
+              count(name = "Num_Recipients"),
+            aes(awardYear))
+n + geom_dotplot()
 ```
 

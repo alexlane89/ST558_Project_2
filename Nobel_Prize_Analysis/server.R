@@ -11,6 +11,7 @@ library(shiny)
 library(tidyverse)
 library(jsonlite)
 library(httr)
+library(xtable)
 
 source("ST558_Project_2.R")
 
@@ -29,11 +30,6 @@ function(input, output, session) {
         })
     })
     
-    output$Nobel_img <- renderImage({
-      img(src = "www/Alfred_Nobel_img.jpg")
-    },
-    deleteFile = FALSE)
-    
     output$cat_text <- renderText({
       if(input$category_sel == "Chemistry") {
         "You have selected the Chemistry category"
@@ -50,39 +46,60 @@ function(input, output, session) {
       }
     })
     
-    output$birth_hist <- renderPlot({
-      
+#    nobel_clean_cat <- reactive({
+#      req("input$category_sel")
 #      if(input$category_sel == "Chemistry") {
+#        nobel_cat <- nobel_clean_data |>
+#          filter(Category == "Chemistry")
 #      } else if (input$category_sel == "Economic Sciences") {
-#        nobel_clean_data |>
+#        nobel_cat <- nobel_clean_data |>
 #          filter(Category == "Economic Sciences")
 #      } else if (input$category_sel == "Literature") {
-#        nobel_clean_data |>
+#        nobel_cat <- nobel_clean_data |>
 #          filter(Category == "Literature")
 #      } else if (input$category_sel == "Peace") {
-#        nobel_clean_data |>
+#        nobel_cat <- nobel_clean_data |>
 #          filter(Category == "Peace")
 #      } else if (input$category_sel == "Physics") {
-#        nobel_clean_data |>
+#        nobel_cat <- nobel_clean_data |>
 #          filter(Category == "Physics")
-#      } else if (input$category_sel ==  "Physiology or Medicine") {
-#        nobel_clean_data |>
-#          filter(Category == "Physiology or Medicine")
+#      } else if (input$category_sel ==  "Medicine") {
+#        nobel_cat <- nobel_clean_data |>
+#          filter(Category == "Medicine")
 #      }
-        
-        gg <- ggplot(nobel_clean_data, aes(Birth_Country))
-        gg + geom_bar()
+#    })
+    
+    output$birth_hist <- renderPlot({
+      gg <- ggplot(nobel_clean_data, aes(Birth_Country_Now))
+      gg + geom_bar(aes(colour = factor(Birth_Continent))) +
+        labs(x = "Birth Country Now",
+             y = "Number of Recipients",
+             title = "Chemistry Prizes Awarded per Birth Country") +
+        theme(axis.text.x = element_text(angle = 90),
+              panel.background = element_rect(fill = "gray"))
     })
     
     output$gen_table <- renderTable({
+#      if (input$category_sel == "Chemistry") {
+#        nobel_clean_data |>
+#          filter(Category == "Chemistry") |>
+#          table(Birth_Country_Now, gender)
+#      }
       cont_table <- table(nobel_clean_data$Birth_Country_Now,
-                          nobel_clean_data$gender)
+                                 nobel_clean_data$gender)
     })
     
     
     output$prizeplot <- renderPlot({
       m <- ggplot(nobel_clean_data, aes(awardYear, prizeAmountAdjusted))
-      m + geom_boxplot()
+      m +
+        geom_point() +
+        labs(x = "Nobel Award Year",
+             y = "Prize Amount Adjusted to Current USD",
+             title = "Adjusted Nobel Prize $ Amounts by Year") +
+        scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
+        scale_y_continuous(labels = scales::comma) +
+        theme(panel.background = element_rect(fill = "gray"))
     })
 
 }

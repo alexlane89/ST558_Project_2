@@ -29,7 +29,26 @@ ui <- dashboardPage(
       tabItem(tabName = "overview",
               fluidRow(
                 box(h3("An Introduction to Nobel Prize Laureate Data")),
-                imageOutput("Nobel_img")
+                box(h4("This app is mean to introduce and provide an overview/
+                       of data related to the Nobel Prize awarded to individuals/
+                       yearly since 1901 in 6 distinct categories:/
+                       Chemistry/
+                       Economics/
+                       Literature/
+                       Medicine/
+                       Peace/
+                       Physics/"),
+                    br(),
+                    h4("The Nobel Prize was created as part of Alfred Nobel's/
+                       endowment, and has become one of the most prestigious/
+                       prizes in any of the 6 fields described."),
+                    br(),
+                    h4("We will download data from the Nobel API. More/
+                       information can be found at the link below"),
+                    br(),
+#                    tags$a(href = "https://app.swaggerhub.com/apis/NobelMedia/NobelMasterData/2.1\)",
+                    ),
+                img(src = "Alfred_Nobel_img.jpg")
               )),
       tabItem(tabName = "download",
               fluidRow(
