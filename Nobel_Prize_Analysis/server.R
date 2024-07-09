@@ -12,6 +12,7 @@ library(tidyverse)
 library(jsonlite)
 library(httr)
 library(xtable)
+library(DT)
 
 source("ST558_Project_2.R")
 
@@ -48,17 +49,28 @@ function(input, output, session) {
              y = "Number of Recipients",
              title = paste0(input$category_sel, " Prizes Awarded per Birth Country")) +
         theme(axis.text.x = element_text(angle = 90),
-              panel.background = element_rect(fill = "gray"))
+              panel.background = element_rect(fill = "gray"),
+              legend.title = element_blank())
     })
     
-    output$gen_table <- renderTable({
-#      if (input$category_sel == "Chemistry") {
-#        nobel_clean_data |>
-#          filter(Category == "Chemistry") |>
-#          table(Birth_Country_Now, gender)
-#      }
-      cont_table <- table(nobel_clean_data$Birth_Country_Now,
-                                 nobel_clean_data$gender)
+    perc_fem_table <- reactive({
+      nobel_clean_cat() |>
+        group_by(Birth_Country_Now) |>
+        summarise(Total_Recipients = n(),
+                  Perc_Fem = (sum(gender == "female")/n())*100) |>
+        arrange(desc(Perc_Fem)) |>
+        ungroup()
+    })
+    
+    output$contingency_table <- renderDT({
+      datatable(perc_fem_table(),
+                options = list(pageLength = 10),
+                colnames = list("Birth Country",
+                                "Total # Recipients",
+                                "Percent Female Recipients (%)"),
+                caption = paste0("Total & Female Percent of Nobel ",
+                input$category_sel, " Prize Recepients by Birth Country"),
+                rownames = FALSE)
     })
     
     
@@ -67,11 +79,26 @@ function(input, output, session) {
       m +
         geom_point() +
         labs(x = "Nobel Award Year",
-             y = "Prize Amount Adjusted to Current USD",
-             title = "Adjusted Nobel Prize $ Amounts by Year") +
+             y = "Prize Amount Adjusted to Current SEK",
+             title = "Adjusted Nobel Prize SEK Amounts by Year") +
         scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
         scale_y_continuous(labels = scales::comma) +
         theme(panel.background = element_rect(fill = "gray"))
     })
-
+    
+    r <- reactive({
+      nobel_clean_data |>
+        group_by(awardYear) |>
+        summarise(Num_Recipients = n()) |>
+        ungroup()
+    })
+    
+    output$rec_plot <- renderPlot({
+      n <- ggplot(r(), aes(awardYear, Num_Recipients))
+      n + geom_point() +
+        labs(x = "Nobel Award Year",
+             y = "Number of Recipients",
+             title = "Number of Prize Recipients Over Time") +
+        scale_x_discrete(guide = guide_axis(check.overlap = TRUE))
+    })
 }

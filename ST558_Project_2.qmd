@@ -391,9 +391,21 @@ wm
 > Create a contingency table of Birth Country and the amount of female & male award recipients each Country has.
 
 ```{r}
-gen_table <- table(z$Birth_Country_Now, z$gender)
+z_summary <- z |>
+  group_by(Birth_Country_Now) |>
+  summarise(Total_Recipients = n(),
+    Perc_Fem = (sum(gender=="female")/n())*100) |>
+  arrange(desc(Perc_Fem)) |>
+  ungroup()
 
-gen_table
+datatable(z_summary,
+          options = list(pageLength = 10),
+          colnames = list("Birth Country",
+                          "Total # Recipients",
+                          "Percent Female Recipients (%)"),
+          caption = paste0("Total & Female Percent of Nobel Recepients
+          for category"),
+          rownames = FALSE)
 ```
 
 > Add a gender proportion per country
@@ -406,23 +418,36 @@ country_total <- z |>
 country_total
 ```
 
-> Could we evaluate if the overall number of recipients has increased significantly?
-
-```{r}
-num_tot <- z |>
-  group_by(awardYear) |>
-  count(name = "Number of Recipients")
-
-num_tot
-```
-
 > A scatter plot of year vs number of recipients
 
 ```{r}
-n <- ggplot(data = z |>
-              group_by(awardYear) |>
-              count(name = "Num_Recipients"),
-            aes(awardYear))
-n + geom_dotplot()
+r <- z |>
+  group_by(awardYear) |>
+  summarise(Num_Recipients = n()) |>
+  ungroup()
+
+r
+```
+
+
+```{r}
+
+n <- ggplot(r, aes(awardYear, Num_Recipients))
+n_p <- n + geom_point() +
+  labs(x = "Nobel Award Year",
+       y = "Number of Recipients across Categories",
+       title = "Number of Recipients Over Time") +
+  scale_x_discrete(guide = guide_axis(check.overlap = TRUE))
+  
+n_p
+
+n_p + geom_smooth(method = "lm", formula = y ~ x)
+```
+
+> Get a regression line for number of yearly recipient increases
+
+```{r}
+lm_num <- lm(r$Num_Recipients ~ r$awardYear - 1)
+summary(lm_num)
 ```
 

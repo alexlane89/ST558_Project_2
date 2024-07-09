@@ -9,6 +9,7 @@
 
 library(shiny)
 library(shinydashboard)
+library(DT)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Nobel Prize Data Analysis"),
@@ -51,50 +52,32 @@ ui <- dashboardPage(
                     ),
                 img(src = "Alfred_Nobel_img.jpg")
               )),
+      #Download tab
       tabItem(tabName = "download",
               fluidRow(
                 box(actionButton(inputId = "download_button", label = "Download Data"))
               )),
+      #Output tab - including category selection & resulting dynamic output.
+      #also includes static output.
       tabItem(tabName = "analysis",
               fluidRow(
+                box(
+                  h5("The items on this page labeled as 'Dynamic' are
+                     based on the Nobel Prize category selected. Use the
+                     radio buttons to select a category and view the 
+                     associated results.")
+                ),
                 box(radioButtons(inputId = "category_sel", "Category Selection",
                              choices = c("Chemistry", "Economic Sciences",
                                          "Literature", "Physiology or Medicine", "Peace",
                                          "Physics"))),
-                box(plotOutput("birth_hist")),
-                box(tableOutput("gen_table")),
-                box(plotOutput("prizeplot"))
-              ))
+                box(plotOutput("birth_hist"), title = "Dynamic - Birth Country Histogram"),
+                box(plotOutput("prizeplot"), title = "Static - Adjusted Nobel Prize Amount by Year"),
+                box(DTOutput("contingency_table"), title = "Dynamic - Female % Recipients Table"),
+                box(plotOutput("rec_plot"), title = "Static - Number of Recipients per Year")
+              )
+        )
     )
-  ),
-    # Boxes need to be put in a row (or column)
-#    fluidRow(
-#      box(plotOutput("plot1", height = 250)),
-      
-#      box(
-#        title = "Controls",
-#        sliderInput("slider", "Number of observations:", 1, 100, 50)
+  )
 )
 
-# Define UI for application that draws a histogram
-#fluidPage(
-
-    # Application title
-#    titlePanel("Nobel Prize Laureate Data"),
-
-    # Sidebar with a slider input for number of bins
-#    sidebarLayout(
-#        sidebarPanel(
-#            sliderInput("bins",
-#                        "Number of bins:",
-#                        min = 1,
-#                        max = 50,
-#                        value = 30)
-#        ),
-
-        # Show a plot of the generated distribution
-#        mainPanel(
-#            plotOutput("distPlot")
-#        )
-#    )
-#)

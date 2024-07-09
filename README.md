@@ -7,15 +7,15 @@ Nobel Prize Award & Laureate information.
 - httr
 - jsonlite
 - shiny
-- xtable
+- DT
 
 ## Code for packages:
 
-library(tidyverse)
-library(httr)
-library(jsonlite)
-library(shiny)
-library(xtable)
+install.packages("tidyverse")
+install.packages("httr")
+install.packages("jsonlite")
+install.packages("shiny")
+library("DT")
 
 ## Code to run app
 
