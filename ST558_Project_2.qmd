@@ -20,6 +20,7 @@ library(tidyverse)
 library(httr)
 library(jsonlite)
 library(timeDate)
+library(DT)
 ```
 
 > There are 2 specificic endpoints for the Nobel Prize dataset: 'Laureates' and 'Nobel Prizes'. More information on this data can be found through the Nobel Prize organization, here:\
@@ -282,7 +283,7 @@ clean_addl_laureate <- function(x) {
     select(!en & !se & !no & !categoryFullName) |>
     unnest(cols = motivation) |>
     mutate(Motivation = en) |>
-    select(!en & !se & !no) |>
+    select(!en & !se & !no & !topMotivation & !penNameOf) |>
     unnest(cols = orgName) |>
     mutate(Organization = en) |>
     select(!en & !se & !no)
@@ -367,27 +368,6 @@ s +
   theme(legend.title = element_blank())
 ```
 
-> Create a geom map that identifies the location and number of prizes in each country per category.
-
-```{r}
-world_coordinates <- map_data("world")
-
-wm <- ggplot() + 
-  
-  geom_map(data = world_coordinates, map = world_coordinates,
-           aes(long, lat, map_id = region)
-           ) +
-  
-  geom_point(data = z$Birth_Country_Now,
-             aes(z$Birth_Long, z$Birth_Lat)
-             )
-
-#wm <- sf::st_read(system.file("shape."))
-
-wm
-```
-
-
 > Create a contingency table of Birth Country and the amount of female & male award recipients each Country has.
 
 ```{r}
@@ -444,10 +424,9 @@ n_p
 n_p + geom_smooth(method = "lm", formula = y ~ x)
 ```
 
-> Get a regression line for number of yearly recipient increases
+> Test the download functionality
 
 ```{r}
-lm_num <- lm(r$Num_Recipients ~ r$awardYear - 1)
-summary(lm_num)
+write_csv(z, "test_Nobel_file.csv") 
 ```
 

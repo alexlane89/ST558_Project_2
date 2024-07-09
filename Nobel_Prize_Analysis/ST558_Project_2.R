@@ -2,6 +2,7 @@
 library(tidyverse)
 library(httr)
 library(jsonlite)
+library(timeDate)
 
 #Eventually, we'll create one function to retrieve a data table for all 
 #years of each Nobel Prize category. The first "sub-function" will be
@@ -121,6 +122,7 @@ get_Nobel_Prize_data <- function(category = "Chemistry") {
   return(cleaned)
 }
 
+################### LAUREATE ENDPOINT ###################################
 # Preceding functions have focused on getting data from Nobel Prize-specific
 # data, but another API endpoint is the Laureate-specific information.
 # This also requires limits of 25-bucket chunks, but instead of 25-years,
@@ -150,7 +152,8 @@ det_last_id <- function(begin = 1000, end = 1050) {
   }
 }
 
-# Now for the loop which gets all buckets of laureate IDs
+# Now for the loop which gets all buckets of laureate IDs, based on the ending
+# ID which was determined in the 'det_last_id' function
 get_laureate_data <- function() {
   a <- GET(paste0("https://api.nobelprize.org/2.1/laureates"))
   b <- content(a, "text") |>
@@ -193,7 +196,8 @@ clean_birth_laureate <- function(x) {
     mutate(Birth_City = en) |>
     select(!en & !se & !no & !cityNow) |>
     unnest(cols = countryNow) |>
-    mutate(Birth_Country_Now = en) |>
+    mutate(Birth_Country_Now = en, Birth_Lat = latitude,
+           Birth_Long = longitude) |>
     select(!en & !se & !no & !sameAs & !latitude & !longitude) |>
     unnest(cols = country) |>
     mutate(Birth_Country = en) |>
@@ -228,7 +232,7 @@ clean_addl_laureate <- function(x) {
     select(!en & !se & !no & !categoryFullName) |>
     unnest(cols = motivation) |>
     mutate(Motivation = en) |>
-    select(!en & !se & !no) |>
+    select(!en & !se & !no & !topMotivation & !penNameOf) |>
     unnest(cols = orgName) |>
     mutate(Organization = en) |>
     select(!en & !se & !no)

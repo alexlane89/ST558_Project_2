@@ -11,7 +11,7 @@ library(shiny)
 library(tidyverse)
 library(jsonlite)
 library(httr)
-library(xtable)
+library(timeDate)
 library(DT)
 
 source("ST558_Project_2.R")
@@ -19,28 +19,27 @@ source("ST558_Project_2.R")
 #Defining nobel_raw_data & nobel_clean_data prior to the shiny function
 #because there appear to be errors if not defined at the outset.
 #Next step is to troubleshoot how to download and clean data through the app
-nobel_raw_data <- get_laureate_data()
-nobel_clean_data <- clean_laureate(nobel_raw_data)
+
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
 
+  nobel_raw_data <- get_laureate_data()
+  nobel_clean_data <- clean_laureate(nobel_raw_data)
+  
+  nobel_clean_cat <- reactive({
+    req("input$category_sel")
+    nobel_cat <- nobel_clean_data |>
+      filter(Category == input$category_sel)
+  })
+  
     #Keep getting an error that 'nobel_raw_data' isn't available unless
     #it's defined prior to the shiny function. This renders the below code extraneous.
-    nobel_raw_data <- observeEvent(input$download_button, {
-      withProgress(
-        message = "Please Wait",
-        detail = "Downloading...",
-        value = 0, {
-          get_laureate_data()
-        })
-    })
-    
-    nobel_clean_cat <- reactive({
-      req("input$category_sel")
-        nobel_cat <- nobel_clean_data |>
-          filter(Category == input$category_sel)
-    })
+    output$download_button <- downloadHandler(
+      filename = paste0("Nobel_", input$category_sel, ".csv"),
+      content = write_csv(nobel_clean_cat(), "ST558_Project_2"),
+      contentType = "text/csv"
+      )
     
     output$birth_hist <- renderPlot({
       gg <- ggplot(nobel_clean_cat(), aes(Birth_Country_Now))

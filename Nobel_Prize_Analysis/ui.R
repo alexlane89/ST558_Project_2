@@ -55,7 +55,11 @@ ui <- dashboardPage(
       #Download tab
       tabItem(tabName = "download",
               fluidRow(
-                box(actionButton(inputId = "download_button", label = "Download Data"))
+                box(downloadButton("download_button", "Download Data")),
+                box(radioButtons(inputId = "category_sel", "Category Selection",
+                                 choices = c("Chemistry", "Economic Sciences",
+                                             "Literature", "Physiology or Medicine", "Peace",
+                                             "Physics")))
               )),
       #Output tab - including category selection & resulting dynamic output.
       #also includes static output.
@@ -65,12 +69,33 @@ ui <- dashboardPage(
                   h5("The items on this page labeled as 'Dynamic' are
                      based on the Nobel Prize category selected. Use the
                      radio buttons to select a category and view the 
-                     associated results.")
+                     associated results."),
+                  br(),
+                  h5("Birth Country Histogram displays the total number of Nobel
+                     Prizes associated with each Country based on the laureates'
+                     birth location. This plot is dynamic and presents totals for
+                     the category selected in the 'Download' tab."),
+                  br(),
+                  h5("The Female % Recipients Table shows the total number of Nobel
+                     recipients per birth country, as well as the proportion of
+                     those recipients which are female. The table is dynamic based
+                     the category selected, and is sorted in descending order by
+                     female proportion."),
+                  br(),
+                  h5("There are 2 static plots on this page. Primarily because the
+                     information they present is irrespective of the category selected. 
+                     The Adjusted Nobel Prize Amount plot shows the Swedish-Kroner denoted
+                     amount which is adjusted for inflation over time. Because the prize
+                     reward amount is independent of prize category (i.e. a Chemistry
+                     & Physics winner will receive the same amount), a dynamic selection
+                     would not necessarily present new information."),
+                  br(),
+                  h5("The Number of Recipients per Year plot is meant to show the
+                     general increase in number of recipients over time. Prizes can
+                     be shared amongst individuals, and this plot appears to show
+                     that generally, the number of prizes shared, or number of individuals
+                     receiving a Nobel Prize has increased over time.")
                 ),
-                box(radioButtons(inputId = "category_sel", "Category Selection",
-                             choices = c("Chemistry", "Economic Sciences",
-                                         "Literature", "Physiology or Medicine", "Peace",
-                                         "Physics"))),
                 box(plotOutput("birth_hist"), title = "Dynamic - Birth Country Histogram"),
                 box(plotOutput("prizeplot"), title = "Static - Adjusted Nobel Prize Amount by Year"),
                 box(DTOutput("contingency_table"), title = "Dynamic - Female % Recipients Table"),
