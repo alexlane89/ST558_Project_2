@@ -37,7 +37,7 @@ function(input, output, session) {
       filename = paste0("Nobel_", input$category_sel, ".csv"),
       content = write.csv(nobel_clean_cat(), "ST558_Project_2", row.names = FALSE),
       contentType = "text/csv"
-      )
+    )
     
     output$birth_hist <- renderPlot({
       gg <- ggplot(nobel_clean_cat(), aes(Birth_Country_Now))

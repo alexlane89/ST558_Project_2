@@ -29,6 +29,8 @@ install.packages("DT")
 
 # Unfortunately this code does not appear to run successfully - An error is returned
 # for utils::download.file(url, method = method, ...)
-shiny::runGitHub("ST558_Project_2", username = "alexlane89")
+# The next step for troubleshooting would be to ensure the correct syntax
+# is being used for the repo name and username IDs.
+shiny::runGitHub("ST558_Project_2", username = getOption("github.alexlane89")
           ref = "Main", subdir = "Nobel_Prize_Analysis", port = NULL,
           launch.browser = getOption("shiny.launch.browser", interactive()))
