@@ -11,6 +11,7 @@ Nobel Prize category.
 - httr
 - jsonlite
 - shiny
+- shinydashboard
 - timeDate
 - DT
 
@@ -20,11 +21,14 @@ install.packages("tidyverse")
 install.packages("httr")
 install.packages("jsonlite")
 install.packages("shiny")
+install.packages("shinydashboard")
 install.packages("timeDate")
 install.packages("DT")
 
 ## Code to run app
 
+# Unfortunately this code does not appear to run successfully - An error is returned
+# for utils::download.file(url, method = method, ...)
 shiny::runGitHub("ST558_Project_2", username = "alexlane89")
-#          ref = "Main", subdir = NULL, port = NULL,
-#          launch.browser = getOption("shiny.launch.browser", interactive()))
+          ref = "Main", subdir = "Nobel_Prize_Analysis", port = NULL,
+          launch.browser = getOption("shiny.launch.browser", interactive()))

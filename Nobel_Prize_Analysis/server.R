@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(shinydashboard)
 library(tidyverse)
 library(jsonlite)
 library(httr)
@@ -29,9 +30,12 @@ function(input, output, session) {
   })
   
     #Keep seeing that the below download Handler only returns an html file.
+    #Further web research implies the issue could be associated with list elements
+    #being part of the input dataframe/tibble. Next step would be to figure out
+    # how to "flatten" the input dataframe and thus allow it to work with "write.csv".
     output$download_button <- downloadHandler(
       filename = paste0("Nobel_", input$category_sel, ".csv"),
-      content = write_csv(nobel_clean_cat(), "ST558_Project_2"),
+      content = write.csv(nobel_clean_cat(), "ST558_Project_2", row.names = FALSE),
       contentType = "text/csv"
       )
     
