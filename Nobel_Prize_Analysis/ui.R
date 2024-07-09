@@ -55,7 +55,10 @@ ui <- dashboardPage(
       #Download tab
       tabItem(tabName = "download",
               fluidRow(
-                box(downloadButton("download_button", "Download Data")),
+                box(
+                  h5("Download a csv file of Nobel Laureate data based on 
+                     your category selection"),
+                  downloadButton("download_button", "Download Data")),
                 box(radioButtons(inputId = "category_sel", "Category Selection",
                                  choices = c("Chemistry", "Economic Sciences",
                                              "Literature", "Physiology or Medicine", "Peace",

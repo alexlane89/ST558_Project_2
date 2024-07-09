@@ -16,12 +16,7 @@ library(DT)
 
 source("ST558_Project_2.R")
 
-#Defining nobel_raw_data & nobel_clean_data prior to the shiny function
-#because there appear to be errors if not defined at the outset.
-#Next step is to troubleshoot how to download and clean data through the app
-
-
-# Define server logic required to draw a histogram
+# Define server logic required to provide output
 function(input, output, session) {
 
   nobel_raw_data <- get_laureate_data()
@@ -33,8 +28,7 @@ function(input, output, session) {
       filter(Category == input$category_sel)
   })
   
-    #Keep getting an error that 'nobel_raw_data' isn't available unless
-    #it's defined prior to the shiny function. This renders the below code extraneous.
+    #Keep seeing that the below download Handler only returns an html file.
     output$download_button <- downloadHandler(
       filename = paste0("Nobel_", input$category_sel, ".csv"),
       content = write_csv(nobel_clean_cat(), "ST558_Project_2"),
